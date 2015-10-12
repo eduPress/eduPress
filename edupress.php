@@ -221,8 +221,8 @@ Nesta sessão, cada propriedade é setada em um filtro do wp e passa uma tag par
 		$this->admin_url = apply_filters( 'edup_admin_url', trailingslashit( $this->plugin_url . 'admin'  ) );
 
 		// Templates
-		$this->templates_dir   = apply_filters( 'edup_templates_dir',   trailingslashit( $this->plugin_dir . 'templates' ) );
-		$this->templates_url   = apply_filters( 'edup_ttemplates_url',   trailingslashit( $this->plugin_url . 'templates' ) );
+		$this->templates_dir   = apply_filters( 'edup_templates_dir',   trailingslashit( $this->plugin_dir . 'template' ) );
+		$this->templates_url   = apply_filters( 'edup_ttemplates_url',   trailingslashit( $this->plugin_url . 'template' ) );
 
 		/** Users *************************************************************/
 
@@ -235,7 +235,6 @@ Nesta sessão, cada propriedade é setada em um filtro do wp e passa uma tag par
 		$this->extend         = new stdClass(); // Plugins add data here
 		$this->errors         = new WP_Error(); // Feedback
 		$this->tab_index      = apply_filters( 'edup_default_tab_index', 100 );
-		echo $this->current_user('ID');
 	}
 
 	/**
@@ -260,7 +259,7 @@ Nesta sessão, cada propriedade é setada em um filtro do wp e passa uma tag par
 		// Quick admin check and load if needed
 		if ( is_admin() ) {
 			require( $this->admin_dir . 'admin.php'   );
-			require( $this->admin_dir . 'actions.php' );
+			$admin = new ED_Admin();
 		}
 	}
 
@@ -278,6 +277,39 @@ Nesta sessão, cada propriedade é setada em um filtro do wp e passa uma tag par
 		add_action( 'deactivate_' . $this->basename, 'edup_deactivation' );
 	}
 
+	function load_class($class=NULL, $name=NULL, $instance=TRUE){
+		$CI =& edupress::instance();
+		if ( is_array($class) ):
+			foreach ($class as $k => $v):
+				eval("\$".$k." = \"".$v."\";");
+			endforeach;
+		endif;
+		if ( ! class_exists('ED_'.$class) ):
+			$file = NULL;
+			if ( file_exists( $this->core_dir . $class . '.php' ) ):
+				$file = $this->core_dir . $class . '.php';
+			elseif ( file_exists( $this->admin_dir . $class . '.php' ) ):
+				$file = $this->admin_dir . $class . '.php';
+			elseif ( file_exists( $this->templates_dir . $class . '.php') ):
+				$file = $this->templates_dir . $class . '.php';
+			else:
+				return FALSE;
+			endif;
+		else:
+			return FALSE;
+		endif;
+		if ( $class != NULL ):
+			require( $file );
+			if ( $name == NULL ) $name = $class;
+			$class = 'ED_'.ucfirst( $class );
+			if ( $instance ):
+				$this->$name = new $class();
+				return TRUE;
+			endif;
+		endif;
+	}
+
+
 }
 
 /**
@@ -291,7 +323,7 @@ Nesta sessão, cada propriedade é setada em um filtro do wp e passa uma tag par
  *
  * @return The one true eduPress Instance
  */
-function edupress() {
+function instance() {
 	return edupress::instance();
 }
 
@@ -306,7 +338,7 @@ if ( defined( 'EDUPRESS_LATE_LOAD' ) ):
 
 // "And now here's something we hope you'll really like!"
 else:
-	edupress();
+	instance();
 endif;
 
 
