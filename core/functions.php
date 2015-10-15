@@ -17,6 +17,11 @@ function get_url($return_array=FALSE){
 	return $return;
 }
 
+function current_page_link($pos=NULL){
+	return '?page=' . $_GET['page'] . '&' . $pos;
+}
+
+
 
 function _attributes_to_string($attributes){
 	if (empty($attributes)) return '';

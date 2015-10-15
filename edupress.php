@@ -1,5 +1,12 @@
 <?php
 
+$z = count($casa);
+for ($i = 0; $i <= $z; $i++) {
+    print_r($casa[$i]);
+}
+
+
+
 /**
  * The eduPress Plugin
  *
@@ -260,6 +267,8 @@ Nesta sessão, cada propriedade é setada em um filtro do wp e passa uma tag par
 		if ( is_admin() ) {
 			require( $this->admin_dir . 'admin.php'   );
 			$admin = new ED_Admin();
+			require( $this->admin_dir . 'options.php'   );
+			$option = new ED_Options();
 		}
 	}
 

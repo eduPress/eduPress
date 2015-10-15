@@ -7,7 +7,81 @@ class ED_Courses{
 
 	public static function courses(){
 		$ED =& instance();
+
+		$ED->load_class('database');
+
 		$ED->load_class(array('class'=>'lists', 'name'=>'list'));
+
+		$args = array(
+			'table'					=>	'wp_edupress_courses',
+			'orderby'				=>	'course_registered',
+			'order'					=>	'desc',
+			'num_itens_per_page'	=>	2,
+			'offset'				=> 	0,
+			'cols_table'			=> array('course_id', 'course_name', 'course_url', 'course_slug', 'course_description'),	
+		);
+		$results = $ED->list->results($args);
+
+		$lines = NULL;
+		$id = 1;
+		foreach ( $results as $key ):
+			$lines .= $ED->list->cols(array(
+										array(
+											'type'		=>	'link',
+											'text'		=>	$key->course_name,
+											'slug'		=>	'column-name',
+											'id'		=>	$key->course_id,
+											'url'		=>	current_page_link('id='.$key->course_id),
+											'title'		=>	'Acessar o curso ' . $key->course_name,
+											'extras_a'	=>	'',
+											'extras_tr'	=>	'',
+											'extras_th'	=>	'',
+											'extras_td'	=>	'',
+											'strong'	=>	TRUE,
+											'excerpt'	=>	$key->course_description,
+											//'image'		=>	'//www.gravatar.com/avatar/8a52ee2ea6d683865df9741181f31e60?d=mm&s=32&r=G',
+											'links'		=>	array( 
+																array(	'type'	=>	'view', 
+																		'text'	=>	'Acessar', 
+																		'title'	=>	'Acessar o curso '. $key->course_name, 
+																		'url'	=>	current_page_link('action=view&id=' . $key->course_id), 
+																		'end'	=>	FALSE
+																),
+																array(	'type'	=>	'edit', 
+																		'text'	=>	'Editar', 
+																		'title'	=>	'Editar o curso '. $key->course_name, 
+																		'url'	=>	current_page_link('action=edit&id=' . $key->course_id), 
+																		'end'	=>	FALSE
+																),
+																array(	'type'	=>	'trash', 
+																		'text'	=>	'Excluir', 
+																		'title'	=>	'Excluir o curso '. $key->course_name, 
+																		'url'	=>	current_page_link('action=trash&id=' . $key->course_id), 
+																		'end'	=>	TRUE
+																),
+															)
+
+										),
+										array(
+											'type'	=> 'link',
+											'text'	=>	$key->course_url,
+											'slug'	=>	'column-name',
+											'id'	=>	$key->course_id,
+											'url'	=>	current_page_link('id='.$key->course_id),
+											'title'	=>	'Acessar o curso ' . $key->course_name
+										),
+										array( 
+											'type'=>'simple', 
+											'text' => $key->course_name, 
+											'slug' => 'column-name', 
+											'id' => $key->course_id
+										),
+
+									)
+								);
+			$id++;
+		endforeach;
+	
 		$ED->list->header('Cursos', 'Adiconar novo', 'edupress-courses-new');
 			$filters = array(
 							array('title'=>'Todos', 'slug'=>'all', 'count'=>'3', 'show'=>TRUE),
@@ -25,13 +99,11 @@ class ED_Courses{
 							array('title'=>'E-mail', 'slug'=>'email', 'order'=>FALSE),
 						);
 				$ED->list->thead($cols);
-				//$lines = 'conteúdo da tabela';
 				$ED->list->tbody($lines);
 				$ED->list->tfoot($cols);
 			$ED->list->table_close();
-			$ED->list->paged(array('num_pages'=>15, 'num_results'=>1, 'num_results_per_page'=>10, 'num_results_this_page'=>1));
+			$ED->list->paged($ED->list->results($args, TRUE));
 		$ED->list->footer();
-
 	}
 
 	public static function new_course(){
